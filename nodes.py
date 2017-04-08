@@ -5,16 +5,17 @@ class Node():
 
     def __init__(self, name, readers=[], writers=[]):
         self.name = name
-        readers = readers if readers is not None else [] 
-        self.readers = [reader.listen() for reader in readers]
-        # gratuitous comprehension just for the side effect
-        _ = [r.send(None) for r in self.readers]  # prime coroutines
-        #self.writers = writers if writers is not None else []
+        self.readers = []
+        self.listener = self.listen()
+        self.listener.send(None)  # prime to coroutine
+
+    def add_reader(self, reader):
+        self.readers.append(reader.listener)
 
     def listen(self):
         while True:
-            r = (yield)
-            print(r)
+            name, val = (yield)
+            print("{} heard {:.3f} from {}".format(self.name, val, name))
 
     def decide_to_write(self):
         while True:
@@ -24,11 +25,12 @@ class Node():
 
     def write(self, w):
         for reader in self.readers:
-            reader.send(w)
+            reader.send((self.name, w))
 
-
+nodes = [Node(x) for x in ('bob', 'darnette', 'eloquise', 'daryll')]
 bob2 = Node('bob2')
-node = Node('bob', [bob2])
+node = Node('bob')
+node.add_reader(bob2)
 
 for _ in node.decide_to_write():
     pass
