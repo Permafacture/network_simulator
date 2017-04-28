@@ -1,0 +1,12 @@
+<!doctype html>
+<html>
+    <script>
+        var exampleSocket = new WebSocket("ws://localhost:9876", 'sample');
+        exampleSocket.onopen = function(e) {
+            exampleSocket.send('Ping');
+        };
+        exampleSocket.onmessage = function (event) {
+            console.log(event.data);
+        };
+    </script>
+</html>
